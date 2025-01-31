@@ -156,6 +156,7 @@ def zadanie4(root, ns):
 
     df_pathways.to_csv('podpunkt4.csv', index=False)
 
+# Zadanie 5: Przypisanie leków do szlaków sygnałowych/metabolicznych i wizualizacja grafowa
 def zadanie5(root, ns):
     def create_pathway_drug_interactions_dataframe(root, ns):
         pathway_interactions = []
@@ -206,6 +207,7 @@ def zadanie5(root, ns):
 
     draw_bipartite_graph(df_interactions)
 
+# Zadanie 6: Obliczenie liczby szlaków interakcji dla każdego leku i przedstawienie wyników na histogramie
 def zadanie6(root, ns):
     def create_drug_pathway_count_dataframe(root, ns):
         drug_pathway_counts = []
@@ -229,7 +231,7 @@ def zadanie6(root, ns):
     print("Drug Pathway Counts DataFrame:")
     print(df_counts)
 
-    df_counts.to_csv('popdunkt6.csv', index=False)
+    df_counts.to_csv('podpunkt6.csv', index=False)
 
     def plot_histogram(df_counts):
         plt.figure(figsize=(12, 8))
@@ -237,12 +239,13 @@ def zadanie6(root, ns):
         plt.xlabel('Number of Pathways')
         plt.ylabel('Number of Drugs')
         plt.title('Histogram of Number of Pathways per Drug')
-        plt.xticks(range(0, df_counts['pathway_count'].max() + 2))
+        plt.xticks(range(0, df_counts['pathway_count'].max() + 1))
         plt.grid(axis='y', linestyle='--', alpha=0.7)
         plt.show()
 
     plot_histogram(df_counts)
 
+# Zadanie 7: Tworzenie ramki danych z informacjami o białkach (targetach) interagujących z lekami
 def zadanie7(root, ns):
     def create_protein_interactions_dataframe(root, ns):
         protein_interactions = []
@@ -307,6 +310,7 @@ def zadanie7(root, ns):
 
     df_proteins.to_csv('podpunkt7.csv', index=False)
 
+# Zadanie 8: Wizualizacja procentowego rozmieszczenia targetów w różnych częściach komórki na wykresie kołowym
 def zadanie8(root, ns):
     def create_protein_interactions_dataframe(root, ns):
         protein_interactions = []
@@ -324,7 +328,7 @@ def zadanie8(root, ns):
                     polypeptide_name = polypeptide.find('db:name', ns).text if polypeptide.find('db:name', ns) is not None else None
                     gene_name = polypeptide.find('db:gene-name', ns).text if polypeptide.find('db:gene-name', ns) is not None else None
                     chromosome = polypeptide.find('db:chromosome-location', ns).text if polypeptide.find('db:chromosome-location', ns) is not None else None
-                    cellular_location = polypeptide.find('db:cellular-location', ns).text if polypeptide.find('db:cellular-location', ns) is not None else None
+                    cellular_location = polypeptide.find('db:cellular-location', ns).text if polypeptide.find('db:cellular-location', ns) is not None else "Unknown"
 
                     protein_interactions.append({
                         'drugbank_id': drugbank_id,
@@ -344,13 +348,27 @@ def zadanie8(root, ns):
 
     # Zliczenie liczby wystąpień każdej lokalizacji w komórce
     location_counts = df_proteins['cellular_location'].value_counts()
+    total_count = location_counts.sum()
 
-    # Tworzenie wykresu kołowego
-    plt.figure(figsize=(8, 8))
-    plt.pie(location_counts, labels=location_counts.index, autopct='%1.1f%%', startangle=140, colors=plt.cm.Paired.colors)
+    # Tworzenie wykresu kołowego z legendą
+    fig, ax = plt.subplots(figsize=(9, 7))
+    colors = plt.cm.Paired.colors  # Pobranie kolorów
+
+    wedges, _ = ax.pie(
+        location_counts, startangle=140, colors=colors,
+        wedgeprops={'linewidth': 1, 'edgecolor': 'white'}
+    )
+
+    # Przygotowanie etykiet z procentami dla legendy
+    labels_with_percentages = [f"{label} ({count/total_count*100:.1f}%)" for label, count in zip(location_counts.index, location_counts)]
+
+    # Dodanie legendy obok wykresu z procentami
+    ax.legend(wedges, labels_with_percentages, title="Cellular Location", loc="center left", bbox_to_anchor=(1, 0.5))
+
     plt.title("Procentowe występowanie targetów w różnych częściach komórki")
     plt.show()
 
+# Zadanie 9: Tworzenie ramki danych z podziałem leków według statusu oraz wizualizacja na wykresie kołowym
 def zadanie9(root, ns):
     def create_drug_status_dataframe(root, ns):
         status_data = []
@@ -393,16 +411,17 @@ def zadanie9(root, ns):
         labels = ['Approved', 'Withdrawn', 'Experimental', 'Investigational', 'Vet Approved']
         sizes = [approved, withdrawn, experimental, investigational, vet_approved]
         colors = ['lightgreen', 'lightcoral', 'lightskyblue', 'lightyellow', 'lightpink']
-        explode = (0.1, 0, 0, 0, 0)  # Wysunięcie pierwszego klina (zatwierdzone)
 
         plt.figure(figsize=(10, 7))
-        plt.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
-        plt.axis('equal')  # Utrzymanie koła w równowadze
+        plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140,
+                wedgeprops={'edgecolor': 'black'})
+        plt.axis('equal')  # Zapewnia, że wykres pozostaje okrągły
         plt.title('Drug Status Distribution')
         plt.show()
 
     plot_pie_chart(approved_count, withdrawn_count, experimental_count, investigational_count, vet_approved_count)
 
+# Zadanie 10: Tworzenie ramki danych przedstawiającej potencjalne interakcje między lekami
 def zadanie10(root, ns):
     def create_drug_interactions_dataframe(root, ns):
         interactions_data = []
@@ -433,7 +452,5 @@ def zadanie10(root, ns):
     df_interactions.to_csv('podpunkt10.csv', index=False)
 
 
-# Przykładowe wywołanie funkcji dla zadania 1
 
-zadanie8(root, ns)
 
